@@ -12,9 +12,10 @@ from torch.nn.modules import loss
 from random_generator_battery import ESSEnv
 import pandas as pd 
 from copy import deepcopy
-from tools import pyomo_base_result,get_episode_return,test_one_episode
+from tools import get_episode_return,test_one_episode
 # from agent import AgentPPO
 from random_generator_battery import ESSEnv
+from typing import Tuple
 
 os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
 script_name=os.path.basename(__file__)
@@ -192,7 +193,7 @@ class AgentPPO:
         a_std_log = getattr(self.act, 'a_std_log', torch.zeros(1))
         return obj_critic.item(), obj_actor.item(), a_std_log.mean().item()  # logging_tuple
 
-    def get_reward_sum_raw(self, buf_len, buf_reward, buf_mask, buf_value) -> (torch.Tensor, torch.Tensor):
+    def get_reward_sum_raw(self, buf_len, buf_reward, buf_mask, buf_value) -> Tuple[torch.Tensor, torch.Tensor]:
         buf_r_sum = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # reward sum
 
         pre_r_sum = 0
@@ -202,7 +203,7 @@ class AgentPPO:
         buf_advantage = buf_r_sum - (buf_mask * buf_value[:, 0])
         return buf_r_sum, buf_advantage
 
-    def get_reward_sum_gae(self, buf_len, ten_reward, ten_mask, ten_value) -> (torch.Tensor, torch.Tensor):
+    def get_reward_sum_gae(self, buf_len, ten_reward, ten_mask, ten_value) -> Tuple[torch.Tensor, torch.Tensor]:
         buf_r_sum = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # old policy value
         buf_advantage = torch.empty(buf_len, dtype=torch.float32, device=self.device)  # advantage value
 
